@@ -1,0 +1,265 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - QUIZZZ</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BakeryManagement.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick-theme.css" />
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            color: #404080;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #404080;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            color: #f04236 !important;
+            font-size: 2rem;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+            .navbar-brand:hover {
+                color: #ff9000 !important;
+            }
+
+            .navbar-brand img {
+                height: 60px;
+                margin-right: 15px;
+                transition: transform 0.3s ease;
+            }
+
+                .navbar-brand img:hover {
+                    transform: scale(1.1);
+                }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .nav-link {
+            color: #ffffff !important;
+            font-size: 1.25rem;
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+            .nav-link:hover {
+                color: #ff9000 !important;
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background-color: #ff9000;
+            border-color: #ff9000;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .btn-primary:hover {
+                background-color: #e68100;
+                border-color: #e68100;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+
+        .btn-secondary {
+            background-color: #404080;
+            border-color: #404080;
+            color: #ffffff;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+            .btn-secondary:hover {
+                background-color: #323466;
+                border-color: #323466;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+
+        .container {
+            max-width: 1200px;
+            margin-top: 2rem;
+            flex: 1;
+        }
+
+        main {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        footer {
+            background-color: #404080;
+            color: #fff;
+            text-align: center;
+            padding: 20px 0;
+            width: 100%;
+            margin-top: auto;
+        }
+
+            footer a {
+                color: #fff;
+                text-decoration: none;
+            }
+
+                footer a:hover {
+                    text-decoration: underline;
+                }
+    </style>
+</head>
+<body>
+    @if (TempData["Success"] != null)
+
+
+
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+
+
+
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <header>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="Bakery Logo"> QUIZZZ
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Exams" asp-action="Index">Đề thi</a>
+                        </li>
+                        @if (Context.Session.GetString("CustomerLogin") != null)
+
+
+
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="ExamResults" asp-action="Index" asp-route-studentId="@Context.Session.GetInt32("CustomerId")">Kết quả thi</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Students" asp-action="Details" asp-route-studentId="@Context.Session.GetInt32("CustomerId")">Thông tin cá nhân</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Logout", "LoginC")">Đăng xuất</a>
+                            </li>
+                        }
+
+
+
+                        else
+
+
+
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="LoginC" asp-action="Index">Đăng nhập</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Students" asp-action="Create">Đăng ký</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/slick-carousel/slick/slick.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>
+<footer>
+    <div class="container">
+        <div class="row">
+            <!-- Cột thông tin về chúng tôi -->
+            <div class="col-md-4 mb-4">
+                <h5>Về Chúng Tôi</h5>
+                <p>Nền tảng thi trắc nghiệm online tốt nhất.</p>
+            </div>
+            <!-- Cột liên kết nhanh -->
+            <div class="col-md-4 mb-4">
+                <h5>Liên Kết Nhanh</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#">Trang Chủ</a></li>
+                    <li><a href="#">Đề thi</a></li>
+                    <li><a href="#">Xem lại bài</a></li>
+                </ul>
+            </div>
+            <!-- Cột mạng xã hội -->
+            <div class="col-md-4 mb-4">
+                <h5>Theo Dõi Chúng Tôi</h5>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,226 @@
+﻿@model List<ExamManagement.Models.Question>
+
+@{
+    ViewBag.Title = "Thi";
+
+
+
+    int duration = ViewBag.Duration;
+
+    int examId = ViewBag.ExamId;
+
+    int studentId = ViewBag.StudentId;
+
+    int STT_CH = 1;
+}
+
+<style>
+    .form-check:hover {
+        background: #f1f1f1;
+        transition: background 0.3s;
+    }
+
+    #timer {
+        background: #ffdddd;
+    }
+
+    #scoreDisplay {
+        color: green;
+    }
+</style>
+
+<body class="bg-light">
+    <div class="container my-4">
+        <h2 class="text-center text-primary mt-3">📖 Bài thi</h2>
+
+        <div class="card p-3 mb-3 shadow-sm text-center">
+            <h4 class="text-primary"><i class="fa-solid fa-file"></i> Mã đề thi: @examId</h4>
+            <h4 class="text-success"><i class="fa-solid fa-clock"></i> Thời gian làm bài: @duration phút</h4>
+            <h4 class="text-info"><i class="fa-solid fa-user"></i> Mã sinh viên: @studentId</h4>
+        </div>
+
+        <div id="timer" class="text-center text-danger p-3 rounded" style="font-size: 24px; font-weight: bold;">
+            ⏳ Thời gian còn lại: <span id="timeDisplay"></span>
+        </div>
+
+        <form id="examForm" method="post" action="@Url.Action("SubmitExam", "Questions")">
+            @foreach (var question in Model)
+            {
+
+                char option = 'A';
+                <div class="card p-3 mb-3 shadow-sm question" data-question-id="@question.QuestionId">
+                    <h5 class="text-dark">Câu @STT_CH: @question.Content</h5>
+                    @foreach (var answer in question.Answers)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="answers[@question.QuestionId]" value="@answer.AnswerId" id="answer_@answer.AnswerId" data-correct="@answer.IsCorrect" required />
+                            <label class="form-check-label" for="answer_@answer.AnswerId">@option. @answer.Content</label>
+                        </div>
+                        option++;
+                    }
+                </div>
+                STT_CH++;
+            }
+            <button type="submit" class="btn btn-success w-100" id="submitBtn">Nộp bài</button>
+        </form>
+
+        <h1 id="scoreDisplay" class="text-center mt-3"></h1>
+
+        <script>
+            // ======= HÀM NỘP BÀI CHUNG =======
+            async function submitExam(autoSubmit = false) {
+                // Nếu nộp thủ công, hiển thị xác nhận
+                if (!autoSubmit) {
+                    const confirmation = confirm("Bạn có chắc chắn muốn nộp bài không?");
+                    if (!confirmation) {
+                        return; // Nếu người dùng chọn "Hủy", dừng hàm
+                    }
+                }
+
+                // Bỏ chặn các sự kiện ngăn tải lại (nếu có)
+                window.removeEventListener("beforeunload", preventUnload);
+                if (document.fullscreenElement) document.exitFullscreen();
+
+                // Tính điểm và thu thập câu trả lời
+                var score = 0;
+                var totalQuestions = document.querySelectorAll('.card').length;
+                var pointPerQuestion = totalQuestions > 1 ? 10 / (totalQuestions - 1) : 0;
+                var MaCauTL = "";
+                var answers = [];
+
+                var questions = document.querySelectorAll('.card');
+                for (let question of questions) {
+                    let selectedAnswer = question.querySelector('input[type="radio"]:checked');
+                    if (selectedAnswer) {
+                        let isCorrect = selectedAnswer.getAttribute('data-correct') === "True";
+                        if (isCorrect) score += pointPerQuestion;
+
+                        let questionId = question.getAttribute("data-question-id");
+                        answers.push({
+                            questionId: parseInt(questionId),
+                            answer: selectedAnswer.value
+                        });
+                        MaCauTL += "," + selectedAnswer.value;
+                    }
+                }
+
+                // Gửi dữ liệu lên server
+                var response = await fetch('@Url.Action("SaveExamResult", "Questions")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        examId: @examId,
+                        studentId: @studentId,
+                        score: score,
+                        MaCauTL: MaCauTL,
+                        answers: answers
+                    })
+                });
+
+                var result = await response.json();
+                if (result.success) {
+                    if (!autoSubmit) {
+                        alert("Điểm của bạn là: " + score); // Chỉ hiển thị khi nộp thủ công
+                    }
+                    localStorage.removeItem('examInProgress');
+                    window.location.href = "/Exams/index";
+                } else {
+                    alert("Có lỗi khi lưu bài thi.");
+                }
+            }
+
+            // ======= CHẶN HOÀN TOÀN TẢI LẠI TRANG =======
+            function preventUnload(e) {
+                e.preventDefault();
+                e.returnValue = "Bài thi sẽ tự động nộp nếu bạn rời khỏi trang!";
+            }
+
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "F5" ||
+                    (e.ctrlKey && e.key === "r") ||
+                    (e.ctrlKey && e.key === "F5") ||
+                    (e.ctrlKey && e.shiftKey && e.key === "r") ||
+                    (e.altKey && e.key === "F4")) {
+                    e.preventDefault();
+                    alert("Không thể tải lại hoặc thoát khi đang làm bài thi!");
+                }
+            });
+
+            window.addEventListener("beforeunload", preventUnload);
+            document.addEventListener("contextmenu", function (e) {
+                e.preventDefault();
+                alert("Không thể sử dụng chuột phải khi làm bài thi!");
+            });
+
+            window.addEventListener("dragstart", function (e) {
+                e.preventDefault();
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log("Không thể bật toàn màn hình: ", err);
+                });
+                localStorage.setItem('examInProgress', 'true');
+            });
+
+            if (localStorage.getItem('examInProgress') === 'true') {
+                window.addEventListener("load", function () {
+                    if (performance.navigation.type === 1) {
+                        submitExam(true);
+                    }
+                });
+            }
+
+            // ======= XỬ LÝ NỘP BÀI THỦ CÔNG =======
+            document.getElementById("examForm").addEventListener("submit", async function (event) {
+                event.preventDefault();
+                await submitExam(); // Gọi với autoSubmit = false để hiển thị xác nhận
+            });
+
+            // ======= LƯU TẠM ĐỊNH KỲ =======
+            setInterval(async function () {
+                var answers = [];
+                var questions = document.querySelectorAll('.card');
+                for (let question of questions) {
+                    let selectedAnswer = question.querySelector('input[type="radio"]:checked');
+                    if (selectedAnswer) {
+                        answers.push({
+                            questionId: parseInt(question.getAttribute("data-question-id")),
+                            answer: selectedAnswer.value
+                        });
+                    }
+                }
+                await fetch('@Url.Action("SaveTempExamResult", "Questions")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        examId: @examId,
+                        studentId: @studentId,
+                        answers: answers
+                    })
+                });
+            }, 30000);
+
+            // ======= ĐỒNG HỒ ĐẾM NGƯỢC VÀ TỰ ĐỘNG NỘP BÀI =======
+            var duration = @duration * 60; // Thời gian tính bằng giây
+            var timerElement = document.getElementById("timer");
+
+            function updateTimer() {
+                var minutes = Math.floor(duration / 60);
+                var seconds = duration % 60;
+                timerElement.innerHTML = "Thời gian còn lại: " + minutes + " phút " + seconds + " giây";
+
+                if (duration <= 0) {
+                    timerElement.innerHTML = "Hết thời gian! Đang nộp bài...";
+                    submitExam(true); // Tự động nộp bài khi hết thời gian, không cần xác nhận
+                } else {
+                    duration--;
+                    setTimeout(updateTimer, 1000);
+                }
+            }
+
+            // Bắt đầu đếm ngược
+            updateTimer();
+        </script>
+    </div>
+</body>
